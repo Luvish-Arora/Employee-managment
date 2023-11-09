@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox
 import mysql.connector
 
-# Establish a connection to your MySQL database
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -13,7 +12,6 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-# Create the Employee table if it doesn't exist
 cursor.execute("CREATE TABLE IF NOT EXISTS Employee (id INT AUTO_INCREMENT PRIMARY KEY, "
                "name VARCHAR(255), age INT, doj DATE, email VARCHAR(255), gender VARCHAR(10), "
                "contact VARCHAR(15), address TEXT)")
@@ -32,7 +30,6 @@ gender = StringVar()
 email = StringVar()
 contact = StringVar()
 
-# Entries Frame
 entries_frame = Frame(root, bg="#535c68")
 entries_frame.pack(side=TOP, fill=X)
 title = Label(entries_frame, text="Employee Management System", font=("Calibri", 18, "bold"), bg="#535c68", fg="white")
@@ -106,18 +103,16 @@ def add_employee():
     cursor.execute("SELECT MAX(id) FROM Employee")
     latest_id = cursor.fetchone()[0]
 
-    # If there are no records yet, set the id to 1, otherwise increment by 1
-    new_id = 1 and cursor.execute("ALTER TABLE Employee AUTO_INCREMENT = 1") if latest_id is None else latest_id + 1
+    new_id = latest_id+1
 
-    cursor.execute("INSERT INTO Employee (name, age, doj, email, gender, contact, address) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                   (txtName.get(), txtAge.get(), txtDoj.get(), txtEmail.get(), comboGender.get(), txtContact.get(),
+    cursor.execute("INSERT INTO Employee (id, name, age, doj, email, gender, contact, address) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                   (new_id, txtName.get(), txtAge.get(), txtDoj.get(), txtEmail.get(), comboGender.get(), txtContact.get(),
                     txtAddress.get(1.0, END)))
 
     db.commit()
     messagebox.showinfo("Success", "Record Inserted")
     clearAll()
     displayAll()
-
 
 def update_employee():
     if txtName.get() == "" or txtAge.get() == "" or txtDoj.get() == "" or txtEmail.get() == "" or comboGender.get() == "" or txtContact.get() == "" or txtAddress.get(
@@ -148,7 +143,6 @@ def delete_employee():
 
     cursor.execute("DELETE FROM Employee WHERE id=%s", (current_id,))
 
-    # Update the ids of the records after the deleted one
     cursor.execute("UPDATE Employee SET id = id - 1 WHERE id > %s", (current_id,))
 
     db.commit()
